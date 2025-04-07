@@ -51,10 +51,14 @@ public class LinkageSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-
-        r = m_colorSensor.red();
-        g = m_colorSensor.green();
-        b = m_colorSensor.blue();
+        if(m_colorSensor!=null) {
+            r = m_colorSensor.red();
+            g = m_colorSensor.green();
+            b = m_colorSensor.blue();
+        }
+        else{
+            r=0; b=0; g=0;
+        }
         telemetry.addData("R", r);
         telemetry.addData("G", g);
         telemetry.addData("B", b);
@@ -73,7 +77,7 @@ public class LinkageSubsystem extends SubsystemBase {
         llservo.setPosition(0.7);
         rwservo.setPosition(0);
         lwservo.setPosition(1);
-        m_intake.set(1);
+        m_intake.set(0.75);
     }
 
     public void ready(){
@@ -100,14 +104,25 @@ public class LinkageSubsystem extends SubsystemBase {
         rlservo.setPosition(0);
         llservo.setPosition(0.7);
     }
-    public void wristIntake(){
-        rwservo.setPosition(1);
-        lwservo.setPosition(0);
+    public boolean wristIntake(){
+        rwservo.setPosition(0.94);
+        lwservo.setPosition(0.06);
+        return true;
+    }
+    public boolean wristOuttake(){
+        rwservo.setPosition(0.0);
+        lwservo.setPosition(1);
+        return true;
+    }
+    public void wristMotorOut(){
+        m_intake.set(0.7);
+    }
+    public void wristMotorIn(){
         m_intake.set(-1);
     }
-    public void wristOuttake(){
-        rwservo.setPosition(0);
-        lwservo.setPosition(1);
+    public void wristMotorStop(){
         m_intake.set(0);
     }
+
+
 }

@@ -58,7 +58,7 @@ public class ExampleBucketAutoCmd extends CommandOpMode {
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(-1.373, 12.656, Math.toRadians(315));
+    private final Pose scorePose = new Pose(7.4239, 16.8071, Math.toRadians(337.7));
 
     /** Lowest (First) Sample from the Spike Mark */
     private final Pose pickup1Pose = new Pose(11.681, 13.189, Math.toRadians(348));
@@ -73,7 +73,8 @@ public class ExampleBucketAutoCmd extends CommandOpMode {
     private final Pose parkPose = new Pose(0, 0, Math.toRadians(0));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
-    private Path scorePreload, park, pickup1, score1;
+    private Path scorePreload, park;
+    private PathChain grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3;
 
 
 
@@ -84,12 +85,46 @@ public class ExampleBucketAutoCmd extends CommandOpMode {
         scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
-        pickup1 = new Path(new BezierLine(new Point(scorePose), new Point(pickup1Pose)));
-        pickup1.setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading());
+        /* Here is an example for Constant Interpolation
+        scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
-        score1 = new Path(new BezierLine(new Point(pickup1Pose), new Point(scorePose)));
-        score1.setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading());
+        /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        grabPickup1 = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+                .build();
 
+        /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        scorePickup1 = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(pickup1Pose), new Point(scorePose)))
+                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+                .build();
+
+        /* This is our grabPickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        grabPickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(scorePose), new Point(pickup2Pose)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
+                .build();
+
+        /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(pickup2Pose), new Point(scorePose)))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+                .build();
+
+        /* This is our grabPickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        grabPickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(scorePose), new Point(pickup3Pose)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
+                .build();
+
+        /* This is our scorePickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        scorePickup3 = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(pickup3Pose), new Point(scorePose)))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
+
+        /* This is our park path. We are using a BezierCurve with 3 points, which is a curved line that is curved based off of the control point */
         park = new Path(new BezierCurve(new Point(scorePose), /* Control Point */ new Point(parkPose), new Point(parkPose)));
         park.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
     }
@@ -116,25 +151,24 @@ public class ExampleBucketAutoCmd extends CommandOpMode {
 
         schedule(
                 new SequentialCommandGroup(
-                        new AutoDrive(driveSubsystem, scorePreload, telemetry),
-                        new ParallelRaceGroup(
-                                new ElevatorCmd(elevatorSubsystem, 69),
-                                new WaitCommand(1500)
-                        ),
-                        new BucketUpCmd(bucketSubsystem),
-                        new BucketDownCmd(bucketSubsystem),
-                        new ParallelRaceGroup(
-                                new ElevatorCmd(elevatorSubsystem, 0),
-                                new WaitCommand(1000)
-                        ),
-                        new ParallelRaceGroup(
-                                new AutoDrive(driveSubsystem, pickup1, telemetry),
-                                new IntakeCmd(linkageSubsystem)
-                        ),
-                        new AutoDrive(driveSubsystem, score1, telemetry)
+                        new AutoDrive(driveSubsystem, scorePreload, telemetry)
+                        //new ParallelRaceGroup(
+                                //new ElevatorCmd(elevatorSubsystem, 69),
+                        //        new WaitCommand(1500)
+                        //),
+                        //new BucketUpCmd(bucketSubsystem),
+                        //new BucketDownCmd(bucketSubsystem),
+                        //new ParallelRaceGroup(
+                                //new ElevatorCmd(elevatorSubsystem, 0),
+                                //new WaitCommand(1000)
+                        //),
+                        //new ParallelRaceGroup(
+                        //        new AutoDrive(driveSubsystem, pickup1, telemetry),
+                        //        new IntakeCmd(linkageSubsystem)
+                        //),
+                        //new AutoDrive(driveSubsystem, grabPickup1, telemetry)
 
                 )
-
 
         );
 
