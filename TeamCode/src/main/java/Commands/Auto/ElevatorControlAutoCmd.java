@@ -16,26 +16,26 @@ public class ElevatorControlAutoCmd extends CommandBase {
     public ElevatorControlAutoCmd(ElevatorSubsystem elevator, int setpoint){
         this.m_setpoint=setpoint;
         this.elevator=elevator;
-        timer = new Timing.Timer(2000, TimeUnit.SECONDS);
+        timer = new Timing.Timer(2000, TimeUnit.MILLISECONDS);
+        timer.start();
         //elevator.setCoefs(kP, kI, kD, kF);
         addRequirements(elevator);
     }
 
     @Override
     public void execute(){
-        timer.start();
         elevator.setArmPower(1);
         elevator.setArmPosition(m_setpoint);
     }
 
     //@Override
     public boolean isFinished() {
-        return timer.done()|| elevator.isReached();
+        return elevator.atTarget()||timer.done()|| elevator.isReached();
     }
 
     @Override
     public void end(boolean interrupted) {
-        elevator.setArmPower(0.01);
+        elevator.setArmPower(0);
 
         super.end(interrupted);
     }

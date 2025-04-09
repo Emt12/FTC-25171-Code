@@ -1,8 +1,6 @@
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.StartEndCommand;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -15,14 +13,9 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import Commands.Auto.AutoDrive;
-import Commands.Auto.AutoDriveX;
 import Commands.Auto.ElevatorControlAutoCmd;
-import Commands.Auto.ElevatorDownAutoCmd;
 import Commands.Elevator.BucketScoreCmd;
 import Commands.Elevator.ElevatorControlDownCmd;
-import Commands.Linkage.IntakeCmd;
-import Commands.Linkage.OutTakeCmd;
-import Commands.Linkage.ReadyCmd;
 import Subsystems.BucketSubsystem;
 import Subsystems.DriveSubsystem;
 import Subsystems.ElevatorSubsystem;
@@ -40,7 +33,7 @@ import pedroPathing.constants.LConstants;
  * @version 2.0, 11/28/2024
  */
 
-@Autonomous(name = "Auto21", group = "Autos")
+@Autonomous(name = "Auto1", group = "Autos")
 public class Auto1 extends CommandOpMode {
     private  ElevatorSubsystem elevatorSubsystem;
     private  BucketSubsystem bucketSubsystem;
@@ -52,19 +45,19 @@ public class Auto1 extends CommandOpMode {
     private int pathState;
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
-    // Skor yapılacak konum
-    private final Pose scorePose = new Pose(6.3, 14.5, Math.toRadians(332.62));
+    /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
+    private final Pose scorePose = new Pose(7.4239, 16.8071, Math.toRadians(337.7));
 
-    // İlk örnek alınacak konum
-    private final Pose pickup1Pose = new Pose(6.35, 14.55, Math.toRadians(355.62));
+    /** Lowest (First) Sample from the Spike Mark */
+    private final Pose pickup1Pose = new Pose(11.681, 13.189, Math.toRadians(348));
 
-    // İkinci örnek alınacak konum
-    private final Pose pickup2Pose = new Pose(14.7, 20.4, Math.toRadians(340));
+    /** Middle (Second) Sample from the Spike Mark */
+    private final Pose pickup2Pose = new Pose(11.366, 18.967, Math.toRadians(0));
 
-    // Üçüncü örnek alınacak konum
-    private final Pose pickup3Pose = new Pose(20.7, 24.8, Math.toRadians(24));
+    /** Highest (Third) Sample from the Spike Mark */
+    private final Pose pickup3Pose = new Pose(24.193, 19.862, Math.toRadians(40.3));
 
-    // Park pozisyonu
+    /** Park Pose for our robot, after we do all of the scoring. */
     private final Pose parkPose = new Pose(0, 0, Math.toRadians(0));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
@@ -140,39 +133,34 @@ public class Auto1 extends CommandOpMode {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
         buildPaths();
+
         register(elevatorSubsystem, bucketSubsystem);
 
 
         schedule(
                 new SequentialCommandGroup(
-                        new InstantCommand(()->linkageSubsystem.ready()).withTimeout(500),
-                        new AutoDrive(driveSubsystem, scorePreload ,telemetry, 0.5),
-                        new ElevatorControlAutoCmd(elevatorSubsystem, 69),
+                        new AutoDrive(driveSubsystem, scorePreload, telemetry, 0.5),
+                        new PrintCommand("Drive to score preload"),
+                        /*new ParallelRaceGroup(
+                                new ElevatorCmd(elevatorSubsystem, 69),
+                                new WaitCommand(1500)
+                        ),*/
+                        new ElevatorControlAutoCmd(elevatorSubsystem, 70),
+                        new PrintCommand("elevator to 69"),
                         new BucketScoreCmd(bucketSubsystem),
-                        new ElevatorDownAutoCmd(elevatorSubsystem, driveSubsystem, 0),
-                        //new AutoDrive(driveSubsystem, grabPickup1, telemetry, 0.5,false),
-
-
-                        new IntakeCmd(linkageSubsystem),
-                        new WaitCommand(500),
-                        new OutTakeCmd(linkageSubsystem),
-                        new WaitCommand(500),
-                        new AutoDrive(driveSubsystem, grabPickup1, telemetry, 0.5,false),
-                        //new AutoDrive(driveSubsystem,telemetry, 350),
-
-                        new ElevatorControlAutoCmd(elevatorSubsystem, 69),
-                        new BucketScoreCmd(bucketSubsystem),
-                        new ElevatorControlDownCmd(elevatorSubsystem, 0)
-
-                        //new AutoDrive(driveSubsystem, grabPickup1, telemetry, 0.5, true)
-                        //new WaitCommand(1000),
-                        //new AutoDrive(driveSubsystem, scorePickup1, telemetry, 0.5, false),
-                        //new WaitCommand(1000),
-                        //new ElevatorControlAutoCmd(elevatorSubsystem, 69),
-                        //new WaitCommand(1000),
-                        //new BucketScoreCmd(bucketSubsystem),
-                        //new ElevatorControlDownCmd(elevatorSubsystem, 0),
-                        //new WaitCommand(500000000)
+                        new PrintCommand("bucket score"),
+                        new ElevatorControlAutoCmd(elevatorSubsystem, 0),
+                        new PrintCommand("elevator to 0"),
+                        new WaitCommand(500000000)
+                        //new ParallelRaceGroup(
+                                //new ElevatorCmd(elevatorSubsystem, 0),
+                                //new WaitCommand(1000)
+                        //),
+                        //new ParallelRaceGroup(
+                        //        new AutoDrive(driveSubsystem, pickup1, telemetry),
+                        //        new IntakeCmd(linkageSubsystem)
+                        //),
+                        //new AutoDrive(driveSubsystem, grabPickup1, telemetry)
 
                 )
 

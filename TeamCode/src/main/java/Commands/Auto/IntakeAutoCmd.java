@@ -2,8 +2,6 @@ package Commands.Auto;
 
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
-import Commands.Linkage.IntakeCmd;
-import Commands.Linkage.OutTakeCmd;
 import Subsystems.LinkageSubsystem;
 
 public class IntakeAutoCmd extends SequentialCommandGroup {
@@ -12,8 +10,8 @@ public class IntakeAutoCmd extends SequentialCommandGroup {
         this.link = linkage;
 
         addCommands(
-                new IntakeCmd(link),
-                new OutTakeCmd(link)
+                new IntakeTimer(link),
+                new OutTakeTimer(link)
                 );
         addRequirements(linkage);
     }

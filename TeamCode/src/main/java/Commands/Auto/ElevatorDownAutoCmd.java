@@ -31,7 +31,7 @@ public class ElevatorDownAutoCmd extends CommandBase {
         elevator.setArmPosition(m_setpoint);
     }
 
-    //@Override
+    @Override
     public boolean isFinished() {
         return elevator.atTarget();
     }
