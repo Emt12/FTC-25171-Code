@@ -1,13 +1,8 @@
-package pedroPathing.examples;
-
-import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
-import com.arcrobotics.ftclib.command.ParallelRaceGroup;
-import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.ScheduleCommand;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.PrintCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.StartEndCommand;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -18,15 +13,15 @@ import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import Commands.Arm.BucketDownCmd;
-import Commands.Arm.BucketUpCmd;
-import Commands.Arm.ElevatorCmd;
 import Commands.Auto.AutoDrive;
-import Commands.Auto.ScoreCmd;
-import Commands.Auto.UpdateCmd;
+import Commands.Auto.AutoDriveX;
+import Commands.Auto.ElevatorControlAutoCmd;
+import Commands.Auto.ElevatorDownAutoCmd;
+import Commands.Elevator.BucketScoreCmd;
+import Commands.Elevator.ElevatorControlDownCmd;
 import Commands.Linkage.IntakeCmd;
+import Commands.Linkage.OutTakeCmd;
 import Commands.Linkage.ReadyCmd;
 import Subsystems.BucketSubsystem;
 import Subsystems.DriveSubsystem;
@@ -45,8 +40,8 @@ import pedroPathing.constants.LConstants;
  * @version 2.0, 11/28/2024
  */
 
-@Autonomous(name = "Auto1", group = "Autos")
-public class ExampleBucketAutoCmd extends CommandOpMode {
+@Autonomous(name = "Auto21", group = "Autos")
+public class Auto1 extends CommandOpMode {
     private  ElevatorSubsystem elevatorSubsystem;
     private  BucketSubsystem bucketSubsystem;
     private DriveSubsystem driveSubsystem;
@@ -57,19 +52,19 @@ public class ExampleBucketAutoCmd extends CommandOpMode {
     private int pathState;
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
-    /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(7.4239, 16.8071, Math.toRadians(337.7));
+    // Skor yapılacak konum
+    private final Pose scorePose = new Pose(6.3, 14.5, Math.toRadians(332.62));
 
-    /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(11.681, 13.189, Math.toRadians(348));
+    // İlk örnek alınacak konum
+    private final Pose pickup1Pose = new Pose(6.35, 14.55, Math.toRadians(355.62));
 
-    /** Middle (Second) Sample from the Spike Mark */
-    private final Pose pickup2Pose = new Pose(11.366, 18.967, Math.toRadians(0));
+    // İkinci örnek alınacak konum
+    private final Pose pickup2Pose = new Pose(14.7, 20.4, Math.toRadians(340));
 
-    /** Highest (Third) Sample from the Spike Mark */
-    private final Pose pickup3Pose = new Pose(24.193, 19.862, Math.toRadians(40.3));
+    // Üçüncü örnek alınacak konum
+    private final Pose pickup3Pose = new Pose(20.7, 24.8, Math.toRadians(24));
 
-    /** Park Pose for our robot, after we do all of the scoring. */
+    // Park pozisyonu
     private final Pose parkPose = new Pose(0, 0, Math.toRadians(0));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
@@ -145,28 +140,39 @@ public class ExampleBucketAutoCmd extends CommandOpMode {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
         buildPaths();
-
         register(elevatorSubsystem, bucketSubsystem);
 
 
         schedule(
                 new SequentialCommandGroup(
-                        new AutoDrive(driveSubsystem, scorePreload, telemetry)
-                        //new ParallelRaceGroup(
-                                //new ElevatorCmd(elevatorSubsystem, 69),
-                        //        new WaitCommand(1500)
-                        //),
-                        //new BucketUpCmd(bucketSubsystem),
-                        //new BucketDownCmd(bucketSubsystem),
-                        //new ParallelRaceGroup(
-                                //new ElevatorCmd(elevatorSubsystem, 0),
-                                //new WaitCommand(1000)
-                        //),
-                        //new ParallelRaceGroup(
-                        //        new AutoDrive(driveSubsystem, pickup1, telemetry),
-                        //        new IntakeCmd(linkageSubsystem)
-                        //),
-                        //new AutoDrive(driveSubsystem, grabPickup1, telemetry)
+                        new InstantCommand(()->linkageSubsystem.ready()).withTimeout(500),
+                        new AutoDrive(driveSubsystem, scorePreload ,telemetry, 0.5),
+                        new ElevatorControlAutoCmd(elevatorSubsystem, 69),
+                        new BucketScoreCmd(bucketSubsystem),
+                        new ElevatorDownAutoCmd(elevatorSubsystem, driveSubsystem, 0),
+                        //new AutoDrive(driveSubsystem, grabPickup1, telemetry, 0.5,false),
+
+
+                        new IntakeCmd(linkageSubsystem),
+                        new WaitCommand(500),
+                        new OutTakeCmd(linkageSubsystem),
+                        new WaitCommand(500),
+                        new AutoDrive(driveSubsystem, grabPickup1, telemetry, 0.5,false),
+                        //new AutoDrive(driveSubsystem,telemetry, 350),
+
+                        new ElevatorControlAutoCmd(elevatorSubsystem, 69),
+                        new BucketScoreCmd(bucketSubsystem),
+                        new ElevatorControlDownCmd(elevatorSubsystem, 0)
+
+                        //new AutoDrive(driveSubsystem, grabPickup1, telemetry, 0.5, true)
+                        //new WaitCommand(1000),
+                        //new AutoDrive(driveSubsystem, scorePickup1, telemetry, 0.5, false),
+                        //new WaitCommand(1000),
+                        //new ElevatorControlAutoCmd(elevatorSubsystem, 69),
+                        //new WaitCommand(1000),
+                        //new BucketScoreCmd(bucketSubsystem),
+                        //new ElevatorControlDownCmd(elevatorSubsystem, 0),
+                        //new WaitCommand(500000000)
 
                 )
 

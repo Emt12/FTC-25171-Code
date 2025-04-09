@@ -15,6 +15,7 @@ import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
 public class DriveSubsystem extends SubsystemBase {
+    int flag=0;
     private Follower follower;
     private Telemetry telemetry;
     private final Pose startPose = new Pose(0,0,0);
@@ -62,5 +63,12 @@ public class DriveSubsystem extends SubsystemBase {
 
     public Follower getFollower(){
         return follower;
+    }
+
+    public void changeFlag(int step){
+        flag = step;
+    }
+    public int getFlag(){
+        return flag;
     }
 }

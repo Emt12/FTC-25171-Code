@@ -1,12 +1,12 @@
-package Commands.Teleop;
+package Commands.Intake;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import Subsystems.LinkageSubsystem;
 
-public class OutTakeTeleCmd extends CommandBase {
+public class IntakeCloseCmd extends CommandBase {
     private LinkageSubsystem link;
-    public OutTakeTeleCmd(LinkageSubsystem linkage){
+    public IntakeCloseCmd(LinkageSubsystem linkage){
         this.link = linkage;
         addRequirements(link);
     }
@@ -14,6 +14,6 @@ public class OutTakeTeleCmd extends CommandBase {
     @Override
     public void execute() {
         link.outtakeTele();
+        super.execute();
     }
-
 }

@@ -2,11 +2,14 @@ package Subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+import java.util.concurrent.TimeUnit;
 
 public class LinkageSubsystem extends SubsystemBase {
     private Servo rlservo;
@@ -83,26 +86,29 @@ public class LinkageSubsystem extends SubsystemBase {
     public void ready(){
         rlservo.setPosition(0);
         llservo.setPosition(0.7);
-        rwservo.setPosition(0.06);
-        lwservo.setPosition(0.94);
+        rwservo.setPosition(0);
+        lwservo.setPosition(1);
         m_intake.set(0);
     }
 
     public void intake(){
+        Timing.Timer timer = new Timing.Timer(500, TimeUnit.MILLISECONDS);
+        timer.start();
+        rwservo.setPosition(0.94);
+        lwservo.setPosition(0.06);
+        m_intake.set(-1);
+        while(!timer.done()){}
         rlservo.setPosition(0.7);
         llservo.setPosition(0);
-        rwservo.setPosition(1);
-        lwservo.setPosition(0);
-        m_intake.set(-1);
     }
 
     public void intakeTele(){
-        rlservo.setPosition(0.7);
+        rlservo.setPosition(0.6);
         llservo.setPosition(0);
     }
     public void outtakeTele(){
         rlservo.setPosition(0);
-        llservo.setPosition(0.7);
+        llservo.setPosition(0.6);
     }
     public boolean wristIntake(){
         rwservo.setPosition(0.94);

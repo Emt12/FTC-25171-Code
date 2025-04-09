@@ -3,23 +3,23 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import Commands.Arm.ElevatorCmd;
+import Commands.Elevator.ElevatorHookCmd;
 import Commands.Drive.DriveCommand;
-import FinalTeleop.Elevator.BucketScoreCmd;
-import FinalTeleop.Elevator.ElevatorControlDownCmd;
-import FinalTeleop.Elevator.ElevatorControlUpCmd;
-import FinalTeleop.Intake.IntakeCloseCmd;
-import FinalTeleop.Intake.IntakeOpenCmd;
-import FinalTeleop.Intake.WristIntakeCmd;
-import FinalTeleop.Intake.WristMotorIn;
-import FinalTeleop.Intake.WristMotorOut;
-import FinalTeleop.Intake.WristMotorReady;
-import FinalTeleop.Intake.WristRaiseCmd;
+import Commands.Elevator.BucketScoreCmd;
+import Commands.Elevator.ElevatorControlDownCmd;
+import Commands.Elevator.ElevatorControlUpCmd;
+import Commands.Intake.IntakeCloseCmd;
+import Commands.Intake.IntakeOpenCmd;
+import Commands.Intake.WristIntakeCmd;
+import Commands.Intake.WristMotorIn;
+import Commands.Intake.WristMotorOut;
+import Commands.Intake.WristMotorReady;
+import Commands.Intake.WristRaiseCmd;
 import Subsystems.BucketSubsystem;
 import Subsystems.DriveSubsystem;
 import Subsystems.ElevatorSubsystem;
 import Subsystems.LinkageSubsystem;
-@TeleOp(name = "Op_Modes.Teleop.Tester")
+@TeleOp(name = "Op_Modes.Teleop.Tele")
 public class TeleopLastVersion extends CommandOpMode {
     private ElevatorSubsystem elevatorSubsystem;
     private DriveSubsystem driveSubsystem;
@@ -64,7 +64,7 @@ public class TeleopLastVersion extends CommandOpMode {
                         .whenHeld(new WristMotorOut(linkageSubsystem))
                                 .whenReleased(new WristMotorReady(linkageSubsystem));
         OperatorPad.getGamepadButton(GamepadKeys.Button.START)
-                        .whenHeld(new ElevatorCmd(elevatorSubsystem, -1));
+                        .whenHeld(new ElevatorHookCmd(elevatorSubsystem, -1));
 
         register(
                 driveSubsystem,

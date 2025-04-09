@@ -1,14 +1,14 @@
-package Commands.Arm;
+package Commands.Elevator;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import Subsystems.BucketSubsystem;
 
-public class BucketUpCmd extends CommandBase {
+public class BucketScoreCmd extends CommandBase {
     private BucketSubsystem bucket;
     boolean finish=false;
 
-    public BucketUpCmd(BucketSubsystem bucket){
+    public BucketScoreCmd(BucketSubsystem bucket){
         this.bucket = bucket;
         addRequirements(bucket);
     }
@@ -22,5 +22,11 @@ public class BucketUpCmd extends CommandBase {
     @Override
     public boolean isFinished() {
         return finish;
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        bucket.runBucketDown();
+        super.end(interrupted);
     }
 }

@@ -30,9 +30,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private TouchSensor touchSensor;
 
-    public boolean toggle;
-
-    //PIDFCoefficients pidOrigL, pidOrigR;
     PIDFCoefficients newPidL, newPidR;
 
 
@@ -57,9 +54,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         Utilities.setMotors(elevatorLeft,true);
         Utilities.setMotors(elevatorRight,true);
 
-        //pidOrigL = elevatorLeft.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-        //pidOrigR = elevatorRight.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-
 
         this.telemetry = telemetry;
     }
@@ -76,6 +70,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     }
 
+    public boolean isReached(){
+        return !elevatorLeft.isBusy() || !elevatorRight.isBusy();
+    }
+
     public void setArmPower(double power){
         elevatorLeft.setPower(power);
         elevatorRight.setPower(power);
@@ -86,30 +84,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void setArmPosition(int distance){
         target=distance;
     }
-
-    public void setCoefs(double kP, double kI, double kD, double kF){
-        newPidL = new PIDFCoefficients(kP, kI, kD, kF);
-        newPidR = new PIDFCoefficients(kP, kI, kD, kF);
-
-        elevatorRight.setPositionPIDFCoefficients(kP);
-        elevatorLeft.setPositionPIDFCoefficients(kP);
-    }
-
-    //
-    public void stop(){
-        elevatorLeft.setPower(0);
-        elevatorRight.setPower(0);
-    }
-    public boolean encoderResetSwitch(){
-        if(touchSensor.isPressed()) {
-            Utilities.resetMotors(elevatorLeft);
-            Utilities.resetMotors(elevatorRight);
-            return true;
-        }
-        return false;
-
-    }
-
     public static double elevatorToCM(int tick){
         return (tick/encoderResolution)*elevatorPerimeter;
     }

@@ -1,4 +1,4 @@
-package FinalTeleop.Intake;
+package Commands.Intake;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
